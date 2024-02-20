@@ -18,7 +18,7 @@ mongoose
     useCreateIndex: true,
     useFindAndModify: false,
   })
-  .then((con) => console.log('DB connection successfully'));
+  .then((con) => console.log('DB connection successfull'));
 
 // read json file
 const tours = JSON.parse(
