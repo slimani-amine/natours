@@ -39,16 +39,21 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please confirm your password 🛑'],
     validate: {
-      // this only works on CREATE and SAVE !!!
-      validator: function (password) {
-        return password === this.password;
+      // This only works on CREATE and SAVE!!!
+      validator: function (el) {
+        return el === this.password;
       },
-      message: 'Passwords do not match. Please try again.',
+      message: 'Passwords are not the same!',
     },
   },
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
 });
 
 userSchema.pre('save', async function (next) {
@@ -61,6 +66,21 @@ userSchema.pre('save', async function (next) {
 
   //delete the passwordConfirm field
   this.passwordConfirm = undefined;
+
+  next();
+});
+
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password') || this.isNew) {
+    return next();
+  }
+  this.passwordChangedAt = Date.now();
+
+  next();
+});
+
+userSchema.pre(/^find/, async function (next) {
+  this.find({ active: { $ne: false } });
 
   next();
 });
